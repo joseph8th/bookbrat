@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "packages/nav.html" %}
+{% endblock %}
+ 
+{% block content %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.as_p }} 
+  <input id="submit" type="submit" name="submit" value="Submit" />
+</form>
+ 
+{% endblock content %}

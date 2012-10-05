@@ -1,0 +1,11 @@
+{% if bookstoreform.errors %}
+  {% block contentFooter %}Correct the error{{ bookstoreform.errors|pluralize }} shown.{% endblock %}
+{% endif %}
+
+<form action="" method="post">
+{% csrf_token %}
+  <table>
+    {{ bookstoreform.as_table }}
+  </table>
+  <input type="submit" class="button" value="Add Store" />
+</form>

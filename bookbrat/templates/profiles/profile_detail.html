@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "profiles/nav.html" %}
+{% endblock %}
+ 
+{% block content %}
+
+<h1>{{ user }}'s Profile</h1>
+<p>Website: {{ profile.url }}</p>
+<p>Company: {{ profile.company }}</p>
+ 
+{% endblock content %}

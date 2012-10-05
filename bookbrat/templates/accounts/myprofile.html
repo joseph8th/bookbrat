@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "packages/nav.html" %}
+{% endblock %}
+
+{% block content %}
+  <div class="displayform">
+    {% if userprofileform.errors %}
+    {% block contentFooter %}Correct the error{{ userprofileform.errors|pluralize }} shown.{% endblock %}
+    {% endif %}
+
+    <form action="" method="post">
+      {% csrf_token %}
+      <table>
+        {{ userprofileform.as_table }}
+      </table>
+      <input type="submit" class="button" value="Save Profile" />
+    </form>
+
+  </div>
+{% endblock %}

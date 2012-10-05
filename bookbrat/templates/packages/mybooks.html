@@ -1,0 +1,10 @@
+<form action="{% url packages.views.deletebook bookstore.id %}" method="post">
+{% csrf_token %}
+{% for book in latest_book_list %}
+    <input type="radio" name="book" id="book{{ forloop.counter }}" value="{{ book.id }}" />
+    <label for="book{{ forloop.counter }}">
+      <a href="{% url mybook_detail bookstore.id book.id %}">{{ book.title }}</a>: {{ book.myprice }}
+    </label><br />
+{% endfor %}
+<input type="submit" class="button" value="Delete" />
+</form>

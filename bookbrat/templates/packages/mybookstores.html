@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "packages/nav.html" %}
+{% endblock %}
+
+{% block content %}
+
+{% if bookstore_list %}
+  <div class="listform">{% include "forms/mybs_list_form.html" %}</div>
+{% else %}
+    <p>No bookstores found.</p>
+{% endif %}
+
+{% endblock %}

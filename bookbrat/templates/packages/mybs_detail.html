@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "packages/mybs_nav.html" %}
+{% endblock %}
+
+{% block content %}
+
+{% if bookstore.owner.id == user.id %}
+<h2>Quick LookUp</h2>
+<div class="displayform" >
+{% include "forms/mybook_qlookup_form.html" %}
+</div>
+{% endif %}
+
+{% if latest_book_list %}
+  {% if bookstore.owner.id == user.id %}
+    <div class="listform">{% include "packages/mybooks.html" %}</div>
+  {% else %}
+    <table>
+      <tbody>
+      <tr>
+        <th>Title</th><th>Price</th>
+      </tr>
+    {% for book in latest_book_list %}
+      <tr>
+        <td><a href="{% url packages.views.results bookstore.id book.id %}">{{ book.title }}</a></td><td>{{ book.myprice }}</td>
+      </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% else %}
+    <p>No books are available. Add one by ISBN above.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block contentFooter %}{{ message }}{% endblock %}

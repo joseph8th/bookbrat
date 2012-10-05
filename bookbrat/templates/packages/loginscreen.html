@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block header %}<a href="{% url packages.views.loginscreen %}">Login</a>{% endblock %}
+
+{% block content %}
+
+<form action="{% url packages.views.loginscreen %}" method="post">
+{% csrf_token %}
+Username: <input type="text" name="username" size=40 /><br />
+Password: <input type="text" name="password" size=40 /><br />
+<input type="submit" value="Login" />
+</form>
+
+{% endblock %}
+
+{% if message %}<p>{{ message }}</p>{% endif %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if latest_book_list %}
+<table>
+  <tbody>
+    <tr>
+      <th>Title</th><th>Price</th>
+    </tr>
+    {% for book in latest_book_list %}
+    <tr>
+      <td><a href="{% url packages.views.results bookstore.id book.id %}">{{ book.title }}</a></td><td>{{ book.myprice }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+    <p>No books are available.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block contentFooter %}{{ message }}{% endblock %}

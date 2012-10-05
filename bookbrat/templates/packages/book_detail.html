@@ -1,0 +1,18 @@
+{# Book detail template #}
+<ul>
+<li>Title: <strong>{{ book.title }}</strong></li>
+<li>ISBN: <strong>{{ book.isbn }}</strong></li>
+{% if book.authors %}<li>Authors: <strong>{{ book.authors }}</strong></li>{% endif %}
+{% if book.publisher %}<li>Publisher: <strong>{{ book.publisher }}</strong></li>{% endif %}
+{% if book.title_long %}<li>Full Title: <strong>{{ book.title_long }}</strong></li>{% endif %}
+{% if book.summary %}<li>Summary: <strong>{{ book.summary }}</strong></li>{% endif %}
+{% if book.notes %}<li>Notes: <strong>{{ book.notes }}</strong></li>{% endif %}
+<li>
+Price Set: <strong>{% if bookstore.owner.id == user.id %}
+<a href="{% url packages.views.detail bookstore.id book.id %}">
+{% else %}
+<a href="{% url packages.views.results bookstore.id book.id %}">
+{% endif %}
+{% if book.myprice == 0.0 %}None Set{% else %}${{ book.myprice }}{% endif %}</a>
+</strong></li>
+</ul>

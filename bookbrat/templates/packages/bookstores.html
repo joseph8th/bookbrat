@@ -1,0 +1,11 @@
+<!-- Form template to handle bookstores listings -->
+<form action="/packages/deletebookstore/" method="post">
+{% csrf_token %}
+{% for bs in bookstore_list %}
+    <input type="checkbox" name="store_id" id="bookstore{{ forloop.counter }}" value="{{ bs.id }}" />
+    <label for="bookstore{{ forloop.counter }}">
+      <a href="/packages/{{ bs.id }}/">{{ bs.store_name }}</a>: {{ bs.access_key }}
+    </label><br />
+{% endfor %}
+<input type="submit" value="Delete Store" />
+</form>

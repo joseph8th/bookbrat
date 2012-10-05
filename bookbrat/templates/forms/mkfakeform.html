@@ -1,0 +1,8 @@
+{# Populate DB w/random isbns form #}
+<form action="{% url packages.views.ipsum bookstore.id %}" method="post">
+{% csrf_token %}
+Count: <input type="text" name="count" size=10 />
+Digits: <input type="text" name="digits" size=2 />
+ISBN Base: <input type="text" name="base" size=12 />
+<input type="submit" class="button" value="Ipsum ISBN" />
+</form>

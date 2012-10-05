@@ -1,0 +1,12 @@
+<!-- Form template to handle bookstores listings -->
+{% for bs in bookstore_list %}
+<ul>
+  <li>
+    <a href="{% url bookstore_detail bs.pk %}">{{ bs.store_name }}</a>
+    : {{ bs.description }} 
+    [ <a href="{% url bookstore_update bs.pk %}">Edit</a> 
+    | <a href="{% url bookstore_delete bs.pk %}">Delete</a> ]
+  </li>
+</ul>
+{% endfor %}
+

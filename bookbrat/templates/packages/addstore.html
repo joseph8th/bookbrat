@@ -1,0 +1,7 @@
+<!-- Form to add a bookstore -->
+<form action="/packages/addbookstore/" method="post">
+{% csrf_token %}
+Store Name: <input type="text" name="store_name" size=50 /><br />
+Access Key: <input type="text" name="access_key" size=20 /><br />
+<input type="submit" value="Add Store" />
+</form>

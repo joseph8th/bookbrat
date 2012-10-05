@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "profiles/nav.html" %}
+{% endblock %}
+ 
+{% block content %}
+
+<h1>All User Profiles</h1>
+
+{% for p in object_list %}
+<ul>
+<a href="{% url profiles_profile_detail p.user %}"><li>{{ p }}</li></a>
+</ul>
+{% endfor %}
+ 
+{% endblock content %}

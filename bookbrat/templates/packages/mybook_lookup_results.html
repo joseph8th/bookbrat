@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "packages/mybs_nav.html" %}
+{% endblock %}
+
+{% block content %}
+
+{% include "packages/book_detail.html" %}
+{% include "packages/pricesearch_list.html" %}
+
+{% endblock %}
+
+{% block contentFooter %}{{ message }}{% endblock %}

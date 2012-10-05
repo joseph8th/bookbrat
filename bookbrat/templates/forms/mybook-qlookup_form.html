@@ -1,0 +1,6 @@
+{# Add a book form #}
+<form action="{% url packages.views.addbook bookstore.id %}" method="post">
+{% csrf_token %}
+ISBN: <input type="text" name="isbn" size=20 />
+<input type="submit" class="button" value="Add Book" />
+</form>

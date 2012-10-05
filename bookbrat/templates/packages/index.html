@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if bookstore_list %}
+<table>
+<tbody>
+<tr>
+  <th>Bookstore</th><th>Description</th><th>Owner</th>
+</tr>
+  {% for bs in bookstore_list %}
+    <tr>
+      <td><a href="{% url packages.views.viewbookstore bs.id %}">{{ bs.store_name }}</a></td><td>{{ bs.description }}</td><td>{{ bs.owner.username }}</td>
+    </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% else %}
+    <p>No bookstores are available.</p>
+{% endif %}
+
+{% endblock %}

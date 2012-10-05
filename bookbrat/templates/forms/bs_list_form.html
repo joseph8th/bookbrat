@@ -1,0 +1,11 @@
+<!-- Form template to handle bookstores listings -->
+<form class="listForm" action="{% url packages.views.deletebookstore %}" method="post">
+{% csrf_token %}
+{% for bs in bookstore_list %}
+    <input type="radio" name="store_id" id="bookstore{{ forloop.counter }}" value="{{ bs.id }}" />
+    <label for="bookstore{{ forloop.counter }}">
+      <a href="{% url packages.views.viewbookstore bs.id %}">{{ bs.store_name }}</a>: {{ bs.description }} [{{ bs.owner.username }}]
+    </label><br />
+{% endfor %}
+<input type="submit" class="button" value="Delete Store" />
+</form>

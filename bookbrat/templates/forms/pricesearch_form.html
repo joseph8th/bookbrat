@@ -1,0 +1,10 @@
+<form action="{% url packages.views.pricesearch bookstore.id book.id %}" method="post">
+{% csrf_token %}
+{% for item in book.dprice %}
+    <input type="radio" name="price" id="price{{ forloop.counter }}" value="{{ item.price }}" />
+    <label for="price{{ forloop.counter }}">
+      {{ item.store }}: <strong>{{ item.price }}</strong> {{ item.currency_code }} ({% if is_new %}new{% else %}used{% endif %})
+    </label><br />
+{% endfor %}
+<input type="submit" value="Set Price" />
+</form>

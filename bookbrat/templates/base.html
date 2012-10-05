@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css" media="screen" />
+  <title>{% block title %}BookBrat Bookstore System{% endblock %}</title>
+</head>
+
+<body>
+  <center>
+  <div id="wrapper">
+
+    <div id="header">
+      <div class="tngText">
+        <a href="{% url bookstore_index %}">BookBrat</a>
+      </div>
+    </div>
+
+    <div id="outerGame">
+      <div id="innerGame">
+        <div id="inInGame">
+          <div id="inInInGame">
+            <div id="gameContainer">
+              <div id="contentHeader">
+                {% block contentHeader %}
+                {% if bookstore %}<a href="{% url packages.views.viewbookstore bookstore.id %}">{{ bookstore.store_name }}</a>
+                {% if book %} | {{ book.isbn }}{% endif %}{% endif %}
+                {% endblock %}
+              </div>
+              <div id="content">
+                {% block content %}{% endblock %}
+              </div>
+              {% if message %}
+              <div id="contentFooter">
+                {% block contentFooter %}{{ message }}{% endblock %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">
+      {% block footer %}
+      <div class="bddL">
+      <ul id="footerNav">
+        {% if user.is_authenticated %}
+        <li>
+          <a href="/accounts/logout/">Logout</a>
+        </li>
+        <li>
+          <a href="/packages/seller/">{{ user.username }}</a>
+        </li>
+        {% else %}
+        <li>
+          <a href="/accounts/login/">Login</a>
+        </li>
+        <li>
+          <a href="/accounts/register/">Register</a>
+        </li>
+        {% endif %}
+      </ul>
+      </div>
+      {% endblock %}
+    </div>
+
+  </div>
+  </center>
+</body>
+</html>

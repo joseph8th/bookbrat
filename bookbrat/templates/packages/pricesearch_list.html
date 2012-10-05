@@ -1,0 +1,11 @@
+{% if book.dprice %}
+  <ul>
+    {% for item in book.dprice %}
+    <li>{{ item.store }}
+      : <strong>{{ item.price }}</strong> 
+      {{ item.currency_code }} 
+      ({% if is_new %}new{% else %}used{% endif %})
+    </li>
+    {% endfor %}
+  </ul>
+{% endif %}

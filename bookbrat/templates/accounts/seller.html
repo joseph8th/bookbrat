@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "packages/sellernav.html" %}
+{% endblock %}
+
+{% block content %}
+
+<div class="listform">
+<ul>
+<a href="{% url packages.views.mybookstores %}"><li>Manage My Stores</li></a>
+</ul>
+</div>
+
+{% endblock %}
