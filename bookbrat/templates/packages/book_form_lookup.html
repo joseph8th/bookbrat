@@ -1,0 +1,20 @@
+<h2>Quick LookUp</h2>
+<form action="{% url book_add bookstore.id %}" method="POST">
+  {% csrf_token %}
+  <table>
+    <tr class="fieldWrapper">
+      <td class="labelWrapper"><label for="id_isbn">ISBN:</label></td>
+      <td class="inputWrapper">
+        <input type="text" name="isbn" size=20 />
+        {% if lookup_engines %}
+        <select name="engine">
+          {% for eng in lookup_engines %}
+          <option value="{{ eng.value }}">{{ eng.name }}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
+        <input type="submit" name="_qlookup" class="button" value="LookUp" />
+      </td>
+    </tr>
+  </table>
+</form>

@@ -1,0 +1,15 @@
+{# Book detail template #}
+<h2>Book Details:</h2>
+{% if book %}
+<ul>
+<li>Title: <strong>{{ book.title }}</strong></li>
+<li>ISBN: <strong>{{ book.isbn }}</strong></li>
+{% if book.authors %}<li>Authors: <strong>{{ book.authors }}</strong></li>{% endif %}
+{% if book.publisher %}<li>Publisher: <strong>{{ book.publisher }}</strong></li>{% endif %}
+{% if book.title_long %}<li>Full Title: <strong>{{ book.title_long }}</strong></li>{% endif %}
+{% if book.summary %}<li>Summary: <strong>{{ book.summary }}</strong></li>{% endif %}
+{% if book.notes %}<li>Notes: <strong>{{ book.notes }}</strong></li>{% endif %}
+</ul>
+{% else %}
+<p>No book found. Please try again.</p>
+{% endif %}

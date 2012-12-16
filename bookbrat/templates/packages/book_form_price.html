@@ -1,0 +1,10 @@
+<form action="{% url book_add bookstore.id %}" method="POST">
+  {% csrf_token %}
+  <table width=100%>
+    <tr>
+      <td><label for="id_price">My Price:</label></td>
+      <td><input type="text" name="myprice" size=20 /></td>
+      <td><input type="submit" name="_plookup" class="button" value="LookUp" /></td>
+    </tr>
+  </table>
+</form>

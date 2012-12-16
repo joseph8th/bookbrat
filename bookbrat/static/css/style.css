@@ -1,5 +1,5 @@
 body {
-    background: #010101;
+    background: #222;
     font-family: 'Ubuntu', Arial, Helvetica, sans-serif;
 }
 
@@ -57,8 +57,8 @@ div#content {
     font-size: 0.9em;
 }
 div#content ul {
-    list-style-type: disc;
-    padding-left: 20px;
+    list-style-type: none;
+    padding-left: 0px;
     margin: 0;    
 }
 div#content ul li {
@@ -111,8 +111,9 @@ form input.button {
 }
 
 div#wrapper {
-    margin-top: 50px;
-    width: 720px;
+    margin-top: 20px;
+    width: 90%;
+    min-width: 720px;
 }
 div#header {
     height: 48px;
@@ -148,7 +149,7 @@ div.tngLabel {
     padding-left: 10px;
 }
 div#outerGame {
-    width: 720px;
+    width: 100%;
     background: #FFDD00;
     float: left;
 }
@@ -158,8 +159,8 @@ div#innerGame {
     top: 0px;
     left: 10px;
     float: left;
-    width: 710px;
-    background: #010101;
+    width: 99%;
+    background: #222;
     border-top-left-radius: 8px 12px;
     border-bottom-left-radius: 8px 12px;
     border-bottom-right-radius: 8px 12px;
@@ -171,7 +172,7 @@ div#inInGame {
     left: 30px;
     float: left;
     background: #77DDFF;
-    width: 650px;
+    width: 95%;
     height-min: 300px;
     margin: 20px 0px 30px 0px;
     padding-bottom: 50px;
@@ -185,8 +186,8 @@ div#inInInGame {
     top: 30px;
     left: 5px;
     float: left;
-    background: #010101;
-    width: 645px;
+    background: #222;
+    width: 100%;
     height-min: 240px;
     border-top-left-radius: 5px 9px;
     border-bottom-left-radius: 5px 9px;
@@ -198,9 +199,10 @@ div#gameContainer {
     left: 20px;
     float: left;
     background: #010101;
-    width: 600px;
+    width: 95%;
     border-left: 5px #000 solid;
     border-right: 5px #000 solid;
+    border-bottom: 5px #000 solid;
 }
 div#footer {
     font-size: 16px;
@@ -211,4 +213,37 @@ div#footer {
     background: #FFDD00;
     border-bottom-left-radius: 18px 24px;
     border-bottom-right-radius: 18px 24px;
+}
+
+div.fieldWrapper {
+    clear: both;
+    width: 100%;
+}
+div.fieldWrapper div.inputWrapper {
+    float: left;
+    padding: 10px 10px 10px 0px
+}
+
+tr.fieldWrapper {
+}
+
+tr.fieldWrapper td.labelWrapper {
+    width: 15%;
+    text-align: right;
+    vertical-align: top;
+}
+tr.fieldWrapper td.inputWrapper {
+    width: auto;
+}
+tr.fieldWrapper td.inputWrapper input,
+tr.fieldWrapper td.inputWrapper textarea {
+    width: 50%;
+}
+tr.fieldWrapper td.inputWrapper input.button {
+    width: 15%;
+}
+
+div.errorWrapper ul {
+    font-size: 0.8em;
+    color: #FF3300;
 }

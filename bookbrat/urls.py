@@ -1,13 +1,15 @@
+import settings
+import registration
+
 from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic import ListView
-
+from dajaxice.core import dajaxice_autodiscover, dajaxice_config
 from packages.models import Bookstore, Book
-import settings
-import registration
 
 admin.autodiscover()
+dajaxice_autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$',
@@ -19,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^profiles/', include('profiles.urls')),
+    url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
     url(r'^packages/', include('packages.urls')),
 )
 

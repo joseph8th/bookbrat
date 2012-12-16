@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% endblock %}
+ 
+{% block content %}
+
+{% if form %}
+<h2>Really delete "{{ object.title }}"?</h2>
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.as_p }} 
+  <input id="submit" type="submit" name="submit" value="Delete" />
+</form>
+
+{% else %}
+
+<h2>Really Delete These Books?</h2>
+<form action="" method="POST">
+  {% csrf_token %}
+  {% load render_table from django_tables2 %}
+
+  {% render_table book_delete_table %}
+  <div class="formWrapper">
+    <div class="inputWrapper">
+      <input type="submit" class="button" name="_delete_confirm" value="Yes" />
+    </div>
+    <div class="inputWrapper">
+      <input type="submit" class="button" name="_delete_cancel" value="No" />
+    </div>
+  </div>
+  
+</form>
+{% endif %}
+ 
+{% endblock content %}

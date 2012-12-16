@@ -1,8 +1,0 @@
-{% extends "base.html" %}
-
-{% block content %}
-{% include "packages/book_detail.html" %}
-{% include "forms/pricesearch_form.html" %}
-{% endblock %}
-
-{% block contentFooter %}{{ message }}{% endblock %}

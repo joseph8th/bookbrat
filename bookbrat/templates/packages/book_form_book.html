@@ -1,0 +1,9 @@
+{# template/packages/book_form_book.html #}
+<form action="" method="POST">
+  {% csrf_token %}
+  <table width=100%>
+    {{ book_form.as_table }}
+  </table>
+  <input type="submit" name="_submit" value="Update" />
+</form>
+ 

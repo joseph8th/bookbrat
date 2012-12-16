@@ -5,19 +5,30 @@
 import datetime
 
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.template import RequestContext
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.utils import simplejson
+from django.utils.decorators import method_decorator
+from django_tables2 import RequestConfig
 
 from packages.functions import *
 from packages.models import Bookstore, Book
 from packages.forms import BookstoreForm, BookForm
+from packages.tables import BookTable
 
 from accounts.models import UserProfile
+
+#### temp globals ####
+ACTION_LIST = [{'value':'trash', 'name':'Trash'},
+               {'value':'delete', 'name':'Delete'},]
+
+ENGINE_LIST = [{'value':'mybooks', 'name':'My Books'},
+               {'value':'isbndb', 'name':'ISBNDB'},]
 
 #### Account views ####
 
@@ -37,20 +48,23 @@ def viewbookstore(request, bookstore_id):
                                'latest_book_list': latest_book_list},
                               context_instance=RequestContext(request))     
 
+
+def detail(request, bookstore_id, book_id):
+    bs = get_object_or_404(Bookstore, pk=bookstore_id)
+    b = bs.book_set.get(pk=book_id)
+    return HttpResponseRedirect(reverse('packages.views.results', 
+                                        args=(bs.id, b.id,)))
+
+
+def results(request, bookstore_id, book_id):
+    bs = get_object_or_404(Bookstore, pk=bookstore_id)
+    b = bs.book_set.get(pk=book_id)
+    return render_to_response('packages/results.html', 
+                              {'bookstore': bs, 'book': b}, 
+                              context_instance=RequestContext(request))
+
+
 #### User store-centric views ####
-
-#@login_required
-class BookstoreCreate(CreateView):
-    model = Bookstore
-
-#@login_required
-class BookstoreUpdate(UpdateView):
-    model = Bookstore
-
-#@login_required
-class BookstoreDelete(DeleteView):
-    model = Bookstore
-    success_url = reverse_lazy('mybookstores')
 
 @login_required
 def mybookstores(request):
@@ -63,130 +77,207 @@ def mybookstores(request):
 @login_required
 def mybookstore_detail(request, bookstore_id): 
     bookstore = get_object_or_404(Bookstore, pk=bookstore_id)
-    latest_book_list = bookstore.book_set.all().order_by('id')[:]
+    # decide how to build table here...
+    book_list = []
+    if request.method == 'POST':
+        if '_qlookup' in request.POST:
+            wrk_val = request.POST['isbn']
+            if 'engine' in request.POST:
+                if 'mybooks' in request.POST['engine']:
+                    book_list = bookstore.get_mybooks_list(wrk_val)
+                elif 'isbndb' in request.POST['engine']:
+                    book = bookstore.get_isbndb_book(wrk_val)
+                    book_form = BookForm(instance=book)
+                    book_form.save(bookstore, commit=False)
+                    return render_to_response(
+                        'packages/book_form_update.html', 
+                        {'bookstore': bookstore, 'book':book,
+                         'book_form': book_form,},
+                        context_instance=RequestContext(request))
+            
+    else:
+        book_list = bookstore.book_set.all()
+    table = BookTable(book_list)
+    RequestConfig(request).configure(table)
     return render_to_response('packages/mybs_detail.html', 
                               {'bookstore': bookstore, 
-                               'latest_book_list': latest_book_list},
+                               'table': table,
+                               'act_list': ACTION_LIST,
+                               'lookup_engines': ENGINE_LIST,},
                               context_instance=RequestContext(request))     
 
 #### Book-centric User views ####
 
+
+@login_required
+def mybooks_action(request, bookstore_id):
+    bookstore = get_object_or_404(Bookstore, pk=bookstore_id)
+    if request.method == 'POST':
+        pks = request.POST.getlist("act")
+        mybooks = bookstore.book_set.filter(pk__in=pks)
+        if 'action' in request.POST:
+            if 'trash' in request.POST['action']:
+                for book in mybooks:
+                    book.myshelf = 'trash'
+                    book.save()
+            if 'delete' in request.POST['action']:
+                table = BookTable(mybooks)
+                return render_to_response('packages/book_confirm_delete.html',
+                                          {'bookstore': bookstore, 
+                                           'book_delete_table': table},
+                                          context_instance=RequestContext(request))
+        if '_delete_confirm' in request.POST:
+            for book in mybooks:
+                book.delete()
+    return HttpResponseRedirect(reverse('bookstore_detail', args=(bookstore.id,)))
+
+
+@login_required
+def mybooks_update(request, bookstore_id, book_id=None):
+    owner = request.user
+    bookstore = owner.bookstore_set.all().get(pk=bookstore_id)
+    if book_id:
+        book = bookstore.book_set.all().get(pk=book_id)
+    else:
+        book = None
+    plookup_list = None
+    template_name = 'packages/book_form_update.html'
+    # update method switch submit type
+    if request.method == 'POST':
+        if book:
+            book_form = BookForm(request.POST, instance=book)
+        else:
+            book_form = BookForm(request.POST)
+        # save book and redirect to success
+        if '_submit' in request.POST:
+            if book_form.is_valid():
+                book_form.save(bookstore)
+                return HttpResponseRedirect(reverse('bookstore_detail', 
+                                                    args=(bookstore.id,)))
+        # populate fields with book lookup data
+        if '_qlookup' in request.POST:
+            wrk_isbn = request.POST['isbn']
+            if wrk_isbn != "":
+                if not book:
+                    book = Book(bookstore=bookstore, date_added=datetime.datetime.now(),
+                                isbn=wrk_isbn, myprice=0.0)
+                if book.set_data(bookstore):
+                    book.shelf = 'lookup'
+                    book_form = BookForm(instance=book)
+                    book_form.save(bookstore, commit=False)
+        # lookup prices on the webz
+        if '_plookup' in request.POST:
+            if not book:
+                book = book_form.save(bookstore, commit=False)
+            book.isbn_db()
+            plookup_list = book.dprice
+            book.dprice = []
+            book_form = BookForm(instance=book)
+            book_form.save(bookstore, commit=False)
+        # set price using plookup form
+        if '_pset' in request.POST:
+            if not book:
+                book = book_form.save(bookstore, commit=False)
+            book.myprice = request.POST['price']
+            book_form = BookForm(instance=book)
+            book_form.save(bookstore, commit=False)
+    else:
+        if book_id:
+            # update book in bookstore
+            book_form = BookForm(instance=book)
+        else:
+            # new unbound form
+            book_form = BookForm()
+    return render_to_response(template_name, 
+                              {'bookstore': bookstore, 'book':book,
+                               'book_form': book_form, 'plookup_list': plookup_list},
+                              context_instance=RequestContext(request))
+
+
 @login_required
 def book_lookup(request, bookstore_id):
+    owner = request.user
+    bookstore = owner.bookstore_set.all().get(pk=bookstore_id)
+    msg = "Invalid ISBN. No book found."
     if request.method == 'POST':
-        owner = request.user
-        bookstore = owner.bookstore_set.all().get(pk=bookstore_id)
         wrk_isbn = request.POST['isbn']
         if wrk_isbn != "":
-            book = bookstore.book_set.create(isbn=wrk_isbn, myprice=0.0,
-                                             date_added=datetime.datetime.now())
-            if book.set_data():
-                book.save()
-                return HttpResponseRedirect(reverse('mybook_lookup_results',
-                                                    args=(bookstore.id, book.id,)))
-            else:
-                book.delete()        
-        latest_book_list = bookstore.book_set.all().order_by('-date_added')[:]
-        message = "Invalid ISBN. No book found."
-        return render_to_response('packages/mybs_detail.html', 
-                                  {'bookstore': bookstore, 
-                                   'latest_book_list': latest_book_list},
-                                  context_instance=RequestContext(request))            
+            book = Book(bookstore=bookstore, date_added=datetime.datetime.now(),
+                        isbn=wrk_isbn, myprice=0.0)
+            if book.set_data(bookstore):
+                book.shelf = 'lookup'
+                book_form = BookForm(instance=book)
+                book_form.save(commit=False)
+                return render_to_response('packages/book_form_add.html',
+                                          {'bookstore': bookstore, 'book':book,
+                                           'book_form': book_form },
+                                          context_instance=RequestContext(request))
+    return HttpResponseRedirect(reverse('bookstore_detail', 
+                                        args=(bookstore.id,),
+                                        message=msg))
 
 @login_required
 def book_lookup_results(request, bookstore_id, book_id):
-    bookstore = get_object_or_404(Bookstore, pk=bookstore_id)
+    owner = request.user
+    bookstore = owner.bookstore_set.all().get(pk=bookstore_id)
     book = bookstore.book_set.get(pk=book_id)
     book.isbn_db()
-    return render_to_response('packages/mybook_lookup_results.html', 
-                              {'bookstore': bookstore, 'book': book}, 
-                              context_instance=RequestContext(request))
-
-@login_required
-def addbook(request, bookstore_id):
     if request.method == 'POST':
-        owner = request.user
-        bookstore = owner.bookstore_set.all().get(pk=bookstore_id)
-        new_isbn = request.POST['isbn']
-        if new_isbn != "":
-            book = bookstore.book_set.create(isbn=new_isbn, myprice=0.0, 
-                                             date_added=datetime.datetime.now())
-            if book.set_data():
-                book.save()
-                return HttpResponseRedirect(reverse('packages.views.results', 
-                                                    args=(bookstore.id, book.id,)))
-            else:
-                book.delete()        
-        latest_book_list = bookstore.book_set.all().order_by('-date_added')[:]
-        message = "Invalid ISBN. No book added."
-        return render_to_response('packages/booklist.html', 
-                                  {'bookstore': bookstore, 
-                                   'latest_book_list': latest_book_list},
-                                  context_instance=RequestContext(request))
-
-@login_required
-def deletebook(request, bookstore_id):
-    if request.method == 'POST':
-        bookstore = get_object_or_404(Bookstore, pk=bookstore_id)
-        try:
-            del_id = request.POST['book']
-        except (KeyError):
+        if request.POST['add'] == "True":
+            book.shelf = 'public'
+            book.save()
+            return HttpResponseRedirect(reverse('mybook_detail', 
+                                                args=(bookstore.id, book.id,)))
+        else:
+            book.delete()
             latest_book_list = bookstore.book_set.all().order_by('-date_added')[:]
-            error_message = "No book selected."
             return render_to_response('packages/mybs_detail.html', 
                                       {'bookstore': bookstore, 
                                        'latest_book_list': latest_book_list},
-                                      context_instance=RequestContext(request))
-        else:
-            book = bookstore.book_set.get(pk=del_id)
-            book.delete()
-            latest_book_list = bookstore.book_set.all().order_by('-date_added')[:]
-            return HttpResponseRedirect(reverse('bookstore_detail', 
-                                                args=(bookstore.id,)))
+                                      context_instance=RequestContext(request))            
+    return render_to_response('packages/mybook_lookup_results.html',
+                              {'bookstore': bookstore, 'book': book},
+                              context_instance=RequestContext(request))
+
 
 @login_required
 def mybook_detail(request, bookstore_id, book_id):
-    bookstore = get_object_or_404(Bookstore, pk=bookstore_id)
+    owner = request.user
+    bookstore = owner.bookstore_set.all().get(pk=bookstore_id)
     book = bookstore.book_set.get(pk=book_id)
-    book.isbn_db()
-    try:
-        book.myprice = request.POST['price']
-    except (KeyError):
-        return render_to_response('packages/mybook_detail.html', 
-                                  {'bookstore' : bookstore, 'book': book,
-                                   'message': "Select a price."}, 
-                                  context_instance=RequestContext(request))
-    else:
-        book.save()
-        return HttpResponseRedirect(reverse('packages.views.results', 
-                                            args=(bookstore.id, book.id,)))
-
-def detail(request, bookstore_id, book_id):
-    bs = get_object_or_404(Bookstore, pk=bookstore_id)
-    b = bs.book_set.get(pk=book_id)
-    return HttpResponseRedirect(reverse('packages.views.results', 
-                                            args=(bs.id, b.id,)))
-
-def results(request, bookstore_id, book_id):
-    bs = get_object_or_404(Bookstore, pk=bookstore_id)
-    b = bs.book_set.get(pk=book_id)
-    return render_to_response('packages/results.html', 
-                              {'bookstore': bs, 'book': b}, 
+    return render_to_response('packages/mybook_detail.html', 
+                              {'bookstore' : bookstore, 'book': book}, 
                               context_instance=RequestContext(request))
+
 
 @login_required
 def pricesearch(request, bookstore_id, book_id):
     bs = get_object_or_404(Bookstore, pk=bookstore_id)
     b = bs.book_set.get(pk=book_id)
-    try:
+    b.isbn_db()
+    message = "Set a price."
+    if 'price' in request.POST:
         b.myprice = request.POST['price']
-    except (KeyError):
-        b.isbn_db()
-        return render_to_response('packages/detail.html', 
-                                  {'bookstore' : bs, 'book': b,
-                                   'message': "Select a price."}, 
-                                  context_instance=RequestContext(request))
-    else:
+        b.dprice = []
         b.save()
-        return HttpResponseRedirect(reverse('packages.views.results', 
-                                            args=(bs.id, b.id,)))
+        message = "Price set."
+    return render_to_response('packages/mybook_detail.html', 
+                              {'bookstore' : bs, 'book': b,
+                               'message': message}, 
+                              context_instance=RequestContext(request))
+
+@login_required
+def pricesearch_json(request, book_pk):
+    msg = {"price_list":[]}
+    if request.is_ajax():
+        book = get_object_or_404(Book, pk=book_pk)
+        book.isbn_db()
+        msg['price_list'] = "<ul>"
+        for p in book.dprice:
+            msg['price_list'] = msg['price_list']+"<li>"+ \
+                p['store']+": $"+p['price']+" "+"</li>"
+        msg['price_list'] = msg['price_list']+"</ul>"
+    else:
+        msg = "AJAX not working here."
+    json = simplejson.dumps(msg)
+    return HttpResponse(json, mimetype='application/json')

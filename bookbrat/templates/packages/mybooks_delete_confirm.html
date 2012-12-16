@@ -1,0 +1,22 @@
+{# packages/mybooks_delete_confirm.html #}
+<h2>Really Delete The Following?</h2>
+<form action="{% url mybooks_action bookstore.id %}" method="POST">
+  {% csrf_token %}
+
+  {% if del_mybooks %}
+  <table>
+    <tr>
+      <th>Title</th><th>Action</th><th>Price</th>
+    </tr>
+    {% for book in del_mybooks %}
+    <tr>
+      <td>
+        {{ book.title }}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <input name="confirm" type="submit" value="Confirm Delete"/>
+</form>

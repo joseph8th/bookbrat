@@ -1,0 +1,13 @@
+<div class="fieldWrapper">
+  <div class="inputWrapper">
+    <select name="action">
+      <option value="">---</option>
+      {% for act in act_list %}
+      <option value="{{ act.value }}">{{ act.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="inputWrapper">
+    <input type="submit" value="Action"/>
+  </div>
+</div>

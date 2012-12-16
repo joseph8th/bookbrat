@@ -1,7 +1,0 @@
-{% if bookstore: %}
-    <a href="/packages/{{ bookstore.id }}/">{{ bookstore.store_name }}</a>
-    {% if book: %}
-        <a href="/packages/{{ bookstore.id }}/{{ book.id }}/">{{ book.title }}</a>
-    {% endif %}
-    <hr />
-{% endif %}

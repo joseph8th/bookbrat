@@ -1,0 +1,8 @@
+<ul id="menu">
+{% if bookstore %}
+    <a href="{% url packages.views.viewbookstore bookstore.id %}"><li>{{ bookstore.store_name }}</li></a>
+{% endif %}
+{% if book %}
+    <li>{{ book.isbn }}</li>
+{% endif %}
+</ul>

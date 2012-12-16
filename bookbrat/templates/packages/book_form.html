@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "nav/mybs_nav.html" %}
+{% endblock %}
+ 
+{% block content %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <table width=100%>
+  {{ form.as_table }}
+  </table>
+  <input id="submit" type="submit" name="submit" value="Submit" />
+</form>
+ 
+{% endblock content %}

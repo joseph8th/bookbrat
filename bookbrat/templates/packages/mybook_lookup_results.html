@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 
 {% block contentHeader %}
-{% include "packages/mybs_nav.html" %}
+{% include "nav/mybs_nav.html" %}
 {% endblock %}
 
 {% block content %}
 
-{% include "packages/book_detail.html" %}
-{% include "packages/pricesearch_list.html" %}
+<div class="displayform" >
+{% include "forms/mybook_lookup_add_form.html" %}
+{% include "packages/mybook_lookup_detail.html" %}
+</div>
+<div class="listform" >{% include "packages/pricesearch_list.html" %}</div>
 
 {% endblock %}
 

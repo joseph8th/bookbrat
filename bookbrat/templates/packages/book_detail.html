@@ -1,4 +1,5 @@
 {# Book detail template #}
+<h2>Book Details:</h2>
 <ul>
 <li>Title: <strong>{{ book.title }}</strong></li>
 <li>ISBN: <strong>{{ book.isbn }}</strong></li>
@@ -8,11 +9,12 @@
 {% if book.summary %}<li>Summary: <strong>{{ book.summary }}</strong></li>{% endif %}
 {% if book.notes %}<li>Notes: <strong>{{ book.notes }}</strong></li>{% endif %}
 <li>
-Price Set: <strong>{% if bookstore.owner.id == user.id %}
-<a href="{% url packages.views.detail bookstore.id book.id %}">
-{% else %}
-<a href="{% url packages.views.results bookstore.id book.id %}">
-{% endif %}
-{% if book.myprice == 0.0 %}None Set{% else %}${{ book.myprice }}{% endif %}</a>
-</strong></li>
+  Price: 
+  <strong>
+    {% if book.myprice == 0.0 %}None Set{% else %}${{ book.myprice }}{% endif %}
+  </strong>
+  {% if bookstore.owner.id == user.id %}
+   | <a href="{% url mybook_detail bookstore.id book.id %}">Set</a>
+  {% endif %}
+</li>
 </ul>

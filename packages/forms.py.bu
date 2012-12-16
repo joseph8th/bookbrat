@@ -1,0 +1,56 @@
+import datetime
+from django import forms
+from packages.models import Bookstore, Book
+from utils.forms import RequestModelForm
+
+# UserProfileForm removed from this ver. 0.1 #
+
+class BookstoreForm(forms.ModelForm):
+    class Meta:
+        model = Bookstore
+        exclude = ('owner')
+
+class BookForm(forms.ModelForm):
+    class Meta:
+        model = Book
+#        exclude = ('date_added', 'bookstore')
+
+    def __init__(self, bookstore, *args, **kwargs):
+        super(RequestBookForm, self).__init__(request, *args, **kwargs)
+
+    def save(self, bookstore, commit=True, *args, **kwargs):
+        book = super(BookForm, self).save(commit=False, *args, **kwargs)
+        book.bookstore = bookstore
+        book.date_added = datetime.datetime.now()
+        if commit:
+            book.save()
+        return book
+
+# RequestModelForm forms
+
+class RequestBookstoreForm(RequestModelForm):
+    class Meta:
+        model = Bookstore
+        exclude = ('owner')
+
+class RequestBookForm(RequestModelForm):
+    class Meta:
+        model = Book
+        # exclude = ('owner', 'date_added', 'bookstore')
+
+    def __init__(self, request, *args, **kwargs):
+        super(RequestBookForm, self).__init__(request, *args, **kwargs)
+#        bookstore_id = args[0]
+#        bs = Bookstore.objects.filter(pk=bookstore_id)
+#        self.fields['bookstore'] = bs
+#        self.fields['myprice'] = 0.0
+#        self.fields['date_added'] = datetime.datetime.now()
+
+#    def clean(self):
+#        cleaned_data = super(RequestBookForm, self).clean()
+#        isbn = cleaned_data.get('isbn')
+#        if isbn and self._errors:
+#            bookstore = self.instance.bookstore
+#            if not bookstore.set_data(self.instance):
+#                raise forms.ValidationError("Unable to set data for book.")
+#        return super(RequestBookForm, self).clean()

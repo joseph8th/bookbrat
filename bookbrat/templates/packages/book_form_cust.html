@@ -1,0 +1,158 @@
+{# template/packages/book_form_cust.html #}
+{% if book.id %}
+<form action="{% url book_update bookstore.id book.id %}" method="POST">
+{% else %}
+<form action="{% url book_add bookstore.id %}" method="POST">
+{% endif %}
+{% csrf_token %}
+<div class="errorWrapper">
+  {{ book_form.non_field_errors }}
+</div>
+<table>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_isbn">ISBN:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.isbn }}
+      <input type="submit" class="button" name="_qlookup" value="Lookup" />
+      <div class="errorWrapper">
+        {{ book_form.isbn.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_myprice">My Price:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.myprice }}
+      <input type="submit" class="button" name="_plookup" value="Lookup" />
+      <div class="errorWrapper">
+      {{ book_form.myprice.errors }}
+      </div>
+    </td>
+  </tr>
+
+</table>
+<table>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_summary">My Shelf:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.myshelf }}
+      <div class="errorWrapper">
+        {{ book_form.myshelf.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_title">Title:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.title }}
+      <div class="errorWrapper">
+        {{ book_form.title.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_title_long">Title Long:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.title_long }}
+      <div class="errorWrapper">
+        {{ book_form.title_long.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_authors">Author(s):</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.authors }}
+      <div class="errorWrapper">
+        {{ book_form.authors.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_publisher">Publisher:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.publisher }}
+      <div class="errorWrapper">
+        {{ book_form.publisher.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_summary">Summary:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.summary }}
+      <div class="errorWrapper">
+        {{ book_form.summary.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="labelWrapper">
+      <label for="id_summary">Notes:</label>
+    </td>
+    <td class="inputWrapper">
+      {{ book_form.notes }}
+      <div class="errorWrapper">
+        {{ book_form.notes.errors }}
+      </div>
+    </td>
+  </tr>
+
+  <tr class="fieldWrapper">
+    <td class="inputWrapper" colspan=2>
+      <input type="submit" name="_submit" class="button" value="Update" />
+    </td>
+  </tr>
+
+</table>
+
+{% if plookup_list %}
+<div class="listform">
+
+  <ul class = "fieldWrapper">
+  {% for item in plookup_list %}
+    <li class = "inputWrapper">
+      <input type="radio" name="price" 
+             id="price{{ forloop.counter }}" value="{{ item.price }}" />
+      <label for="price{{ forloop.counter }}">
+        {{ item.store }}: <strong>{{ item.price }}</strong> {{ item.currency_code }} ({% if item.is_new == '1' %}new{% else %}used{% endif %})
+      </label>
+    </li>
+  {% endfor %}
+  </ul>
+
+  <div class="fieldWrapper">
+    <div class="inputWrapper">
+      <input type="submit" name="_pset" class="button" value="Set Price" />
+    </div>
+  </div>
+
+</div>
+{% endif %}
+
+</form>

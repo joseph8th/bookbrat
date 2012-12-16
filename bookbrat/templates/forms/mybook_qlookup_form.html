@@ -1,6 +1,7 @@
 {# Lookup a book form #}
+<h2>Quick LookUp</h2>
 <form action="{% url mybook_lookup bookstore.id %}" method="post">
 {% csrf_token %}
 ISBN: <input type="text" name="isbn" size=20 />
-<input type="submit" class="button" value="LookUp" />
+<input type="submit" name="_qlookup" class="button" value="LookUp" />
 </form>

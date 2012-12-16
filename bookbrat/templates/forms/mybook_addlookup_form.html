@@ -1,0 +1,9 @@
+<h2>Add this book?</h2>
+<form action="{% url mybook_lookup_results bookstore.id book.id %}" method="post">
+{% csrf_token %}
+<p><input type="radio" name="add" value="True" />
+  <label>Yes, add this book to my bookstore.</label><br />
+  <input type="radio" name="add" value="False" />
+  <label>No, do not add this book.</label></p>
+<input type="submit" value="Next >" />
+</form>

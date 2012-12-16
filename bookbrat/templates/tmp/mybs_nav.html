@@ -1,0 +1,13 @@
+<ul id="menu">
+  <a href="{% url mybookstores %}"><li>My Stores</li></a>
+  {% if bookstore %}
+  <a href="{% url bookstore_detail bookstore.id %}"><li>{{ bookstore.store_name }}</li></a>
+  {% endif %}
+  {% if book %}
+  <li>{{ book.isbn }}</li>
+  {% else %}
+    {% if bookstore %}
+    <a href="{% url book_add bookstore.id %}"><li>Add Book</li></a>
+    {% endif %}
+  {% endif %}
+</ul>

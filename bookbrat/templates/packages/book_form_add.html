@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block contentHeader %}
+{% include "nav/mybs_nav.html" %}
+{% endblock %}
+ 
+{% block content %}
+
+<div class="displayform" >{% include "packages/book_form_lookup.html" %}</div>
+<div class="displayform" >{% include "packages/book_form_book.html" %}</div>
+<div class="displayform" >{% include "packages/book_form_price.html" %}</div>
+
+{% if book.dprice %}
+<div class="listform" >{% include "forms/pricesearch_form.html" %}</div>
+{% endif %}
+ 
+{% endblock content %}

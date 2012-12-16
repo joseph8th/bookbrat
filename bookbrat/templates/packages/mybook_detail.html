@@ -1,12 +1,22 @@
 {% extends "base.html" %}
 
 {% block contentHeader %}
-{% include "packages/mybs_nav.html" %}
+{% include "nav/mybs_nav.html" %}
 {% endblock %}
 
 {% block content %}
-{% include "packages/book_detail.html" %}
+
+<div class="listform">{% include "packages/book_detail.html" %}</div>
+{# <div id="{{ book.id }}" class="pricesearch">Price Lookup</div> #}
+{% if book.dprice %}
 {% include "forms/pricesearch_form.html" %}
-{% endblock %}
+{% else %}
+<form action="{% url pricesearch bookstore.id book.id %}" method="POST">
+{% csrf_token %}
+  <input type="submit" value="Price Lookup" />
+</form>
+{% endif %}
+
+{% endblock content %}
 
 {% block contentFooter %}{{ message }}{% endblock %}

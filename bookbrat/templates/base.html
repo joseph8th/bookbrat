@@ -1,9 +1,26 @@
+{# % load dajaxice_templatetags % #}
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
   <title>{% block title %}BookBrat Bookstore System{% endblock %}</title>
+  <script type="text/javascript"
+          src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+  </script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('.pricesearch').bind('click', function() {
+        $.get("/packages/seller/pricesearch/"+this.id+"/", function(data) {
+          result_dom="<h2>Prices Found:</h2>"+data.price_list;
+          $('#subContent')[0].innerHTML=result_dom;
+        });
+      });
+    });
+  </script>
+  {# % dajaxice_js_import % #}
 </head>
 
 <body>
@@ -23,18 +40,28 @@
             <div id="gameContainer">
               <div id="contentHeader">
                 {% block contentHeader %}
-                {% if bookstore %}<a href="{% url packages.views.viewbookstore bookstore.id %}">{{ bookstore.store_name }}</a>
-                {% if book %} | {{ book.isbn }}{% endif %}{% endif %}
-                {% endblock %}
+                {% include "nav/base_nav.html" %}
+                {% endblock contentHeader %}
               </div>
               <div id="content">
                 {% block content %}{% endblock %}
+                <div id="subContent">
+                  {% block subContent %}{% endblock %}
+                </div>
               </div>
-              {% if message %}
-              <div id="contentFooter">
-                {% block contentFooter %}{{ message }}{% endblock %}
+              {% block contentFooter %}
+              {% if messages %}
+              <div id="contentFooter">                
+                <ul class="messages">
+                  {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                  </li>
+                  {% endfor %}
+                </ul>
               </div>
               {% endif %}
+              {% endblock %}
             </div>
           </div>
         </div>
