@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.views.generic import CreateView, UpdateView, DeleteView
 
 #### General use objects ####
+
 class MessageMixin(object):
     """
     Display notifications when using Class-Based Views
