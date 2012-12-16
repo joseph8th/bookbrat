@@ -1,4 +1,5 @@
-# Django settings for bookbrat project.
+# Django settings for bookbrat project - ver01.
+# By Joseph Edwards VIII (joseph8th@urcomics.com)
 
 import os
 
