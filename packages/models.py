@@ -9,13 +9,46 @@ from django.core.urlresolvers import reverse
 
 from packages.functions import *
 
+# Lookup Engine parent and child models
+class LookupEngine(models.Model):
+    bookstore = models.ForeignKey(Bookstore)
+
+class LookupISBNDB(LookupEngine):
+    engine_name = "isbndb"
+    api_url = "https://isbndb.com/api/books.xml?access_key={apikey}"
+    rtype = "&results={rtype}"
+    stype = "&index1={stype}"
+    sval = "&value1={sval}"
+
+    # User's ISBNDB.com API access key
+    api_key = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return unicode(self.engine_name)
+
+    # assemble lookup URL according to API
+    def get_dom(self, my_rtype, my_stype, my_sval):
+
+        url = self.api_url.format(apikey=self.api_key) + 
+              self.rtype.format(rtype=my_rtype) + 
+              self.stype.format(stype=my_stype) + 
+              self.sval.format(sval=my_sval)
+
+        try:
+            dom = ElementTree.parse(urllib.urlopen(url)) 
+        except (IOError):
+            return None
+        else:
+            return dom
+
 
 # Bookstore model
 class Bookstore(models.Model):
     owner = models.ForeignKey(User)
     store_name = models.CharField(max_length=100)
     description = models.CharField(max_length=100)
-    access_key = models.CharField(max_length=20)
+
+#    isbndb_key=models.CharField(max_length=20)
 
     def get_absolute_url(self):
         return reverse('packages.views.mybookstore_detail', 
@@ -24,12 +57,28 @@ class Bookstore(models.Model):
     def __unicode__(self):
         return unicode(self.store_name)
 
-    def get_lookup_list(self, lookup_type, value):
-        
-        if lookup_type is 'mybooks':
-            return self.get_mybooks_list(value)
-        elif lookup_type is 'isbndb':
-            return self.get_isbndb_book(value)
+    def get_lookup_choices(self):
+        engines = self.lookupengine_set.all()
+        if not engines:
+            return None
+        else:
+            return [{'value':e.id, 'name':e.engine_name} for e in engines]
+
+    def get_lookup_list(self, lookup_type, value):        
+        if value:
+            if lookup_type is 'mybooks':
+                return self.get_mybooks_list(value)
+            else: 
+                engine = self.lookupengine_set.all().get(engine_name=lookup_type)
+                if engine:
+                    book = Book(bookstore=self, date_added=datetime.datetime.now(), 
+                                myprice=0.0, isbn=my_isbn)
+                    if book.set_data(self, engine):
+                        book.shelf = 'lookup'
+                        return book
+                    else:
+                        return None
+
         else:
             return self.book_set.all()
 
@@ -40,43 +89,73 @@ class Bookstore(models.Model):
             )
         return mybooks_list
 
-    def get_isbndb_book(self, sisbn):
+    def get_isbndb_book(self, my_isbn):
         book = Book(bookstore=self, date_added=datetime.datetime.now(), 
-                    myprice=0.0, isbn=sisbn)
+                    myprice=0.0, isbn=my_isbn)
         if book.set_data(self):
             book.shelf = 'lookup'
             return book
         else:
             return None
 
+
 # Book model
 class Book(models.Model):
+
+    # define choices
+    SHELF_CHOICES = (
+        ('public', 'Public'), ('lookup', 'Lookup'),
+        ('trash', 'Trash'),   ('sold', 'Sold'), 
+        )
+    MEDIA_CHOICES = (
+        ('NO', '----'),        ('P', 'Paperback'),
+        ('H', 'Hardcover'),    ('MM', 'Mass Market PB'),
+        ('CD', 'Audio CD'),    ('DVD', 'DVD'),
+        ('VHS', 'VHS'),        ('VG', 'Video Game'),
+        ('SC', 'Softcover'),   ('LP', 'LP Record'),
+        ('12', '12in Record'), ('10', '10in Record'),
+        ('7', '7in Record'),
+        )
+    CONDITION_CHOICES = (
+        ('NO', '----'),                    ('ULN', 'Used: Like New'),
+        ('UVG', 'Used: Very Good'),        ('UG', 'Used: Good'),
+        ('UA', 'Used: Acceptable'),        ('CLN', 'Collectible: Like New'),
+        ('CVG', 'Collectible: Very Good'), ('CG', 'Collectible: Good'),
+        ('CA', 'Collectible: Acceptable'), ('NEW', 'New'),
+        )
+
+    # Bookstore is PK for the Brat
     bookstore = models.ForeignKey(Bookstore, blank=True)
     date_added = models.DateTimeField('date added', blank=True)
-    # Basic data fields
+    sku = models.CharField(max_length=100, blank=True)
+    # Primary data fields
     title = models.CharField(max_length=100, blank=True)
     title_long = models.CharField(max_length=200, blank=True)
     isbn = models.CharField(validators=[validate_isbn], max_length=20, blank=True)
     authors = models.CharField(max_length=100, blank=True)
     publisher = models.CharField(max_length=100, blank=True)
-    # Detail fields
+    pub_date = models.DateTimeField('date published', blank=True)
+    media = models.CharField(max_length=24, choices=MEDIA_CHOICES, default='NO')
+    volume = models.CharField(max_length=24, blank=True)
+    edition = models.CharField(max_length=24, blank=True)
+    keywords = models.TextField(max_length=200, blank=True)
+    # Secondary data fields
+    condition = models.CharField(max_length=24, choices=CONDITION_CHOICES, default='NO')
+    image_url = models.URLField(max_length=200, blank=True)
     summary = models.TextField(max_length=500, blank=True)
     notes = models.TextField(max_length=500, blank=True)
+
+    # SKU is PK for Bookstore (seller)
+    sku = models.CharField(max_length=100, blank=True)
     # Price fields
     myprice = models.FloatField('my price', blank=True)
     dprice = []
     # Primary filter property
-    SHELF_CHOICES = (
-        ('public', 'Public'),
-        ('lookup', 'Lookup'),
-        ('trash', 'Trash'),
-    )
-    myshelf = models.CharField(max_length=12,
-                               choices=SHELF_CHOICES,
-                               default='public')
+    myshelf = models.CharField(max_length=12, choices=SHELF_CHOICES, default='public')
 
     def get_absolute_url(self):
-        return reverse('packages.views.mybook_detail', args=(self.bookstore.id, self.pk,))
+        return reverse('packages.views.mybook_detail', 
+                       args=(self.bookstore.id, self.pk,))
 
     def __unicode__(self):
         return unicode(self.isbn)
@@ -105,7 +184,7 @@ class Book(models.Model):
 
 
     # populate book data from ISBNDB.com
-    def set_data(self, bookstore=None):
+    def set_data(self, bookstore=None, engine=None):
         if not bookstore:
             if self.bookstore:
                 bookstore = self.bookstore
@@ -113,10 +192,11 @@ class Book(models.Model):
                 return False
         if not self.is_valid_isbn():
             return False
-        else:
+        elif engine:
             isbn = self.isbn
-            access_key = bookstore.access_key
-            dom = get_dom(access_key, "details", "isbn", isbn)
+#            access_key = bookstore.access_key
+#            dom = get_dom(access_key, "details", "isbn", isbn)
+            dom = engine.set_dom(self, "details", "isbn", isbn)
             if not dom:
                 return False
             else:

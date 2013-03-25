@@ -114,6 +114,7 @@ div#wrapper {
     margin-top: 20px;
     width: 90%;
     min-width: 720px;
+    max-width: 1000px;
 }
 div#header {
     height: 48px;
